@@ -230,6 +230,7 @@ namespace DshTray
             sb.AppendLine("startOnLaunch=" + (config.StartOnLaunch ? "true" : "false"));
             sb.AppendLine("fallbackRandomPort=" + (config.FallbackRandomPort ? "true" : "false"));
             sb.AppendLine("trayWindow=" + (FindTrayWindow(0) != IntPtr.Zero ? "present" : "absent"));
+            sb.AppendLine("dataWritable=" + (AppPaths.CanWriteDirectory(dataDir) ? "true" : "false"));
             sb.AppendLine("launcherLog=" + log.LogPath);
             sb.AppendLine("dshLog=" + log.DshLogPath);
             sb.AppendLine();

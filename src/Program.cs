@@ -43,6 +43,26 @@ namespace DshTray
                 return Fail("\u65e0\u6cd5\u521b\u5efa\u6570\u636e\u76ee\u5f55\uff1a" + ex.Message);
             }
 
+            // A tray started from a restricted shell/sandbox cannot write its data
+            // directory; it used to run invisibly while holding the single-instance
+            // mutex, so shortcut launches then silently forwarded and exited.
+            if (options.Action == "tray" && !AppPaths.CanWriteDirectory(dataDir))
+            {
+                try
+                {
+                    File.AppendAllText(
+                        Path.Combine(Path.GetTempPath(), "DSHTray-startup-error.log"),
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " read-only data dir: " + dataDir + Environment.NewLine,
+                        Util.Utf8);
+                }
+                catch
+                {
+                }
+                return Fail("\u65e0\u6cd5\u5199\u5165\u6570\u636e\u76ee\u5f55\uff1a\r\n" + dataDir
+                    + "\r\n\r\n\u8bf7\u4ece\u684c\u9762\u300cDeepSeek Harness\u300d\u5feb\u6377\u65b9\u5f0f\u542f\u52a8\uff0c"
+                    + "\u4e0d\u8981\u5728\u53d7\u9650\u7ec8\u7aef\u6216\u6c99\u7bb1\u91cc\u8fd0\u884c\u3002");
+            }
+
             Config config = Config.Load(AppPaths.ConfigFile(dataDir));
             if (options.Port > 0) config.Port = options.Port;
             Logger log = new Logger(dataDir);
@@ -91,6 +111,7 @@ namespace DshTray
                 {
                     ServerController controller = new ServerController(config, log, dataDir);
                     controller.SuppressAutoOpen = options.Silent || options.Autostart;
+                    controller.AutoOpenOnAdopt = !options.Silent && !options.Autostart;
                     TrayContext context = new TrayContext(config, log, controller, AppPaths.WindowTitle, options.Silent, Environment.GetCommandLineArgs()[0]);
                     log.Info("launcher started pid=" + Process.GetCurrentProcess().Id + " data=" + dataDir);
                     Application.Run(context);

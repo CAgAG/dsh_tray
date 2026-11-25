@@ -79,6 +79,9 @@ namespace DshTray
         /// <summary>When true (autostart / --silent), never open a browser automatically.</summary>
         public bool SuppressAutoOpen;
 
+        /// <summary>Open the page once when a manual launch attaches to an already running DSH.</summary>
+        public bool AutoOpenOnAdopt;
+
         public event EventHandler Changed;
 
         public ServerController(Config cfg, Logger log, string dataDir)
@@ -252,6 +255,20 @@ namespace DshTray
             else
             {
                 RaiseChanged();
+                if (AutoOpenOnAdopt)
+                {
+                    AutoOpenOnAdopt = false;
+                    if (!SuppressAutoOpen && (state == DshState.Running || state == DshState.External))
+                    {
+                        StatusSnapshot snapshot = Snapshot;
+                        string url = !string.IsNullOrEmpty(snapshot.AuthUrl) ? snapshot.AuthUrl : snapshot.CleanUrl;
+                        if (!string.IsNullOrEmpty(url))
+                        {
+                            _log.Info("manual launch attached to an existing DSH; opening the page");
+                            OpenUrl(url);
+                        }
+                    }
+                }
             }
         }
 

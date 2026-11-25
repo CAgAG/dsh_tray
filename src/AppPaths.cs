@@ -9,7 +9,7 @@ namespace DshTray
         public const string AppName = "DeepSeekHarnessTray";
         public const string DisplayName = "DeepSeek Harness \u6258\u76d8";
         public const string ProductName = "DeepSeek Harness Tray";
-        public const string Version = "1.1.0";
+        public const string Version = "1.1.1";
 
         /// <summary>
         /// Optional isolated instance (tests, or several profiles side by side): set
@@ -43,6 +43,22 @@ namespace DshTray
         {
             if (string.IsNullOrEmpty(dir)) return;
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+        }
+
+        /// <summary>Checks that the data directory accepts writes (sandboxes and read-only profiles do not).</summary>
+        public static bool CanWriteDirectory(string dir)
+        {
+            try
+            {
+                string probe = Path.Combine(dir, ".write-test-" + Guid.NewGuid().ToString("N") + ".tmp");
+                File.WriteAllText(probe, "ok", new UTF8Encoding(false));
+                File.Delete(probe);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public static string ConfigFile(string dataDir) { return Path.Combine(dataDir, "config.ini"); }
