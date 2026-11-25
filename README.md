@@ -11,7 +11,8 @@ A tiny Windows tray app that starts `dsh web` with one double-click, shows its s
 - Double-click to start DSH (same as `npx @deepseek-ai/dsh web`, no console window)
 - Tray icon shows status: green = running, blue = external instance, yellow = starting/stopping, red = failed, grey = stopped
 - Left-click or double-click opens the page using the launch token (avoids the 401 page)
-- Right-click menu: open page, copy URL, restart, stop, view logs, edit config, start with Windows, quit
+- Right-click menu: open page, copy URL, restart, stop, view logs, edit config, start with Windows, language, quit
+- Language submenu (Auto / 中文 / English) switches the UI immediately; `--language` does the same from the CLI
 - Single instance; attaches to an already running DSH instead of starting another one
 - Quitting only removes the tray icon: DSH keeps running and is adopted on the next launch
 

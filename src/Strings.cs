@@ -36,6 +36,12 @@ namespace DshTray
             Apply(value);
         }
 
+        /// <summary>Forces the language to the Windows UI culture (the "auto" setting).</summary>
+        public static void UseSystemLanguage()
+        {
+            _english = DetectEnglish();
+        }
+
         private static void Apply(string value)
         {
             string tag = (value ?? "").Trim().ToLowerInvariant();

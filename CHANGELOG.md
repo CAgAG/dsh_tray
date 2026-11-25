@@ -2,6 +2,13 @@
 
 所有重要变动记录在这里。版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.3.0] - 2026-11-25
+
+### Added
+
+- Tray menu → **Language / 界面语言** submenu (Auto / 中文 / English) switches the UI immediately and persists the choice to `config.ini`.
+- `--language auto|zh|en` command-line switch: applies live when the tray is running, otherwise saves the setting.
+
 ## [1.2.0] - 2026-11-25
 
 ### Added

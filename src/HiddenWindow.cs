@@ -35,7 +35,7 @@ namespace DshTray
 
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg >= Native.WM_DSH_OPEN && m.Msg <= Native.WM_DSH_RESTART)
+            if (m.Msg >= Native.WM_DSH_OPEN && m.Msg <= Native.WM_DSH_LANGUAGE)
             {
                 Action<int, IntPtr> handler = MessageReceived;
                 if (handler != null)

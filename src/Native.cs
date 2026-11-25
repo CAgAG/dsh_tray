@@ -13,6 +13,7 @@ namespace DshTray
         public const int WM_DSH_QUIT = WM_APP + 4;
         public const int WM_DSH_REFRESH = WM_APP + 5;
         public const int WM_DSH_RESTART = WM_APP + 6;
+        public const int WM_DSH_LANGUAGE = WM_APP + 7;
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);

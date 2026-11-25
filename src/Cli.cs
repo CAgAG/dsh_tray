@@ -18,6 +18,7 @@ namespace DshTray
         public string DataDir = "";
         public int Port = -1;
         public string OutFile = "";
+        public string Language = "";
 
         public static CliOptions Parse(string[] args)
         {
@@ -67,6 +68,10 @@ namespace DshTray
                     case "--out":
                         options.OutFile = NextValue(tokens, ref i, "--out");
                         break;
+                    case "--language":
+                        options.Action = "language";
+                        options.Language = NextValue(tokens, ref i, "--language");
+                        break;
                 }
             }
             return options;
@@ -106,6 +111,8 @@ namespace DshTray
                 "  DeepSeekHarnessTray.exe --open           Open the DSH page"));
             sb.AppendLine(Strings.T("  DeepSeekHarnessTray.exe --quit           退出托盘（DSH 保持运行）",
                 "  DeepSeekHarnessTray.exe --quit           Quit the tray (DSH keeps running)"));
+            sb.AppendLine(Strings.T("  DeepSeekHarnessTray.exe --language <auto|zh|en>  切换界面语言（托盘运行中立即生效）",
+                "  DeepSeekHarnessTray.exe --language <auto|zh|en>  Switch UI language (live when the tray is running)"));
             sb.AppendLine();
             sb.AppendLine(Strings.T("选项：", "Options:"));
             sb.AppendLine(Strings.T("  --data <目录>   数据目录（默认 %LOCALAPPDATA%\\", "  --data <dir>    Data directory (default %LOCALAPPDATA%\\")
@@ -243,6 +250,7 @@ namespace DshTray
             sb.AppendLine("trayWindow=" + (FindTrayWindow(0) != IntPtr.Zero ? "present" : "absent"));
             sb.AppendLine("dataWritable=" + (AppPaths.CanWriteDirectory(dataDir) ? "true" : "false"));
             sb.AppendLine("language=" + Strings.LanguageTag);
+            sb.AppendLine("languageSetting=" + config.Language);
             sb.AppendLine("launcherLog=" + log.LogPath);
             sb.AppendLine("dshLog=" + log.DshLogPath);
             sb.AppendLine();
@@ -399,6 +407,37 @@ namespace DshTray
                 {
                     if (window != IntPtr.Zero) Native.PostMessage(window, Native.WM_DSH_QUIT, IntPtr.Zero, IntPtr.Zero);
                     Emit(options, dataDir, "action=quit\r\ntrayRunning=" + (window != IntPtr.Zero ? "true" : "false") + "\r\n");
+                    return 0;
+                }
+                case "language":
+                {
+                    string value = (options.Language ?? "").Trim().ToLowerInvariant();
+                    if (value.Length == 0) value = "auto";
+                    if (value != "auto" && value != "system" && value != "zh" && value != "en"
+                        && !value.StartsWith("zh-", StringComparison.Ordinal)
+                        && !value.StartsWith("en-", StringComparison.Ordinal))
+                    {
+                        Emit(options, dataDir, "action=language\r\nerror=invalid language (auto|zh|en)\r\n");
+                        return 2;
+                    }
+
+                    string normalized = value == "auto" || value == "system"
+                        ? "auto"
+                        : (value.StartsWith("zh", StringComparison.Ordinal) ? "zh" : "en");
+                    if (window != IntPtr.Zero)
+                    {
+                        int code = normalized == "auto" ? 0 : (normalized == "zh" ? 1 : 2);
+                        if (Native.PostMessage(window, Native.WM_DSH_LANGUAGE, new IntPtr(code), IntPtr.Zero))
+                        {
+                            Emit(options, dataDir, "action=language\r\nlanguage=" + normalized + "\r\napplied=live\r\n");
+                            return 0;
+                        }
+                    }
+
+                    config.Language = normalized;
+                    config.Save();
+                    Strings.Initialize(normalized);
+                    Emit(options, dataDir, "action=language\r\nlanguage=" + normalized + "\r\napplied=config\r\n");
                     return 0;
                 }
             }

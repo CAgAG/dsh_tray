@@ -34,6 +34,10 @@ namespace DshTray
         private readonly ToolStripMenuItem _logsItem;
         private readonly ToolStripMenuItem _configItem;
         private readonly ToolStripMenuItem _folderItem;
+        private readonly ToolStripMenuItem _languageItem;
+        private readonly ToolStripMenuItem _langAutoItem;
+        private readonly ToolStripMenuItem _langZhItem;
+        private readonly ToolStripMenuItem _langEnItem;
         private readonly ToolStripMenuItem _autoItem;
         private readonly ToolStripMenuItem _exitItem;
 
@@ -62,6 +66,13 @@ namespace DshTray
             _logsItem = new ToolStripMenuItem(Strings.T("查看日志", "View logs"), null, delegate { OpenFile(_log.LogPath); });
             _configItem = new ToolStripMenuItem(Strings.T("编辑配置", "Edit config"), null, delegate { OpenFile(_cfg.ConfigPath); });
             _folderItem = new ToolStripMenuItem(Strings.T("打开数据文件夹", "Open data folder"), null, delegate { OpenFolder(Path.GetDirectoryName(_log.LogPath)); });
+
+            _languageItem = new ToolStripMenuItem(Strings.T("界面语言", "Language"));
+            _langAutoItem = new ToolStripMenuItem(Strings.T("自动（跟随系统）", "Auto (follow Windows)"), null, delegate { ChangeLanguage("auto"); });
+            _langZhItem = new ToolStripMenuItem("中文", null, delegate { ChangeLanguage("zh"); });
+            _langEnItem = new ToolStripMenuItem("English", null, delegate { ChangeLanguage("en"); });
+            _languageItem.DropDownItems.AddRange(new ToolStripItem[] { _langAutoItem, _langZhItem, _langEnItem });
+
             _autoItem = new ToolStripMenuItem(Strings.T("开机自动启动", "Start with Windows"), null, delegate { ToggleAutoStart(); });
             _exitItem = new ToolStripMenuItem(Strings.T("退出（DSH 继续运行）", "Quit (keep DSH running)"), null, delegate { BeginQuit(false); });
 
@@ -80,6 +91,7 @@ namespace DshTray
                 _configItem,
                 _folderItem,
                 new ToolStripSeparator(),
+                _languageItem,
                 _autoItem,
                 new ToolStripSeparator(),
                 _exitItem
@@ -169,6 +181,7 @@ namespace DshTray
 
                 try { _autoItem.Checked = IsAutoStartEnabled(); }
                 catch { }
+                RefreshLanguageChecks();
 
                 if (snapshot.State != _lastState)
                 {
@@ -478,6 +491,54 @@ namespace DshTray
             UpdateUi();
         }
 
+        private void ChangeLanguage(string setting)
+        {
+            string value = string.IsNullOrEmpty(setting) ? "auto" : setting.Trim().ToLowerInvariant();
+            _cfg.Language = value;
+            try
+            {
+                _cfg.Save();
+            }
+            catch (Exception ex)
+            {
+                _log.Warn("save language failed: " + ex.Message);
+            }
+
+            if (value == "auto" || value == "system") Strings.UseSystemLanguage();
+            else Strings.Initialize(value);
+
+            ApplyStaticMenuTexts();
+            UpdateUi();
+            _log.Info("language changed: setting=" + value + " effective=" + Strings.LanguageTag);
+            _log.Debug("menu labels: open=" + _openItem.Text + "; copy=" + _copyItem.Text + "; restart=" + _restartItem.Text
+                + "; stop=" + _stopItem.Text + "; exit=" + _exitItem.Text + "; language=" + _languageItem.Text);
+        }
+
+        private void ApplyStaticMenuTexts()
+        {
+            _copyItem.Text = Strings.T("复制页面地址", "Copy page URL");
+            _restartItem.Text = Strings.T("重启 DSH", "Restart DSH");
+            _stopItem.Text = Strings.T("停止 DSH", "Stop DSH");
+            _logsItem.Text = Strings.T("查看日志", "View logs");
+            _configItem.Text = Strings.T("编辑配置", "Edit config");
+            _folderItem.Text = Strings.T("打开数据文件夹", "Open data folder");
+            _autoItem.Text = Strings.T("开机自动启动", "Start with Windows");
+            _exitItem.Text = Strings.T("退出（DSH 继续运行）", "Quit (keep DSH running)");
+            _languageItem.Text = Strings.T("界面语言", "Language");
+            _langAutoItem.Text = Strings.T("自动（跟随系统）", "Auto (follow Windows)");
+            _langZhItem.Text = "中文";
+            _langEnItem.Text = "English";
+        }
+
+        private void RefreshLanguageChecks()
+        {
+            string setting = (_cfg.Language ?? "").Trim().ToLowerInvariant();
+            bool auto = setting.Length == 0 || setting == "auto" || setting == "system";
+            _langAutoItem.Checked = auto;
+            _langZhItem.Checked = !auto && setting.StartsWith("zh", StringComparison.Ordinal);
+            _langEnItem.Checked = !auto && setting.StartsWith("en", StringComparison.Ordinal);
+        }
+
         private void OnTrayMessage(int message, IntPtr wParam)
         {
             switch (message)
@@ -508,6 +569,9 @@ namespace DshTray
                     break;
                 case Native.WM_DSH_RESTART:
                     _ctl.Restart();
+                    break;
+                case Native.WM_DSH_LANGUAGE:
+                    ChangeLanguage(wParam.ToInt32() == 0 ? "auto" : (wParam.ToInt32() == 1 ? "zh" : "en"));
                     break;
                 case Native.WM_DSH_QUIT:
                     BeginQuit(true);
