@@ -1,0 +1,50 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        shell: powershell
+        run: |
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+          .\build.ps1
+
+      - name: Verify exe version matches tag
+        shell: powershell
+        run: |
+          $tag = "${{ github.ref_name }}".TrimStart('v')
+          $fileVersion = (Get-Item '.\dist\DeepSeekHarnessTray.exe').VersionInfo.FileVersion
+          Write-Host "tag=$tag exe=$fileVersion"
+          if (-not $fileVersion.StartsWith($tag)) {
+            throw "exe version ($fileVersion) does not match tag ($tag)"
+          }
+
+      - name: Package release files
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          Copy-Item '.\dist\DeepSeekHarnessTray.exe' '.\release\DeepSeekHarnessTray.exe'
+          $hash = (Get-FileHash '.\release\DeepSeekHarnessTray.exe' -Algorithm SHA256).Hash
+          Set-Content -Path '.\release\DeepSeekHarnessTray.exe.sha256' -Value "$hash  DeepSeekHarnessTray.exe" -Encoding ascii
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: DeepSeek Harness Tray ${{ github.ref_name }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            release/DeepSeekHarnessTray.exe
+            release/DeepSeekHarnessTray.exe.sha256

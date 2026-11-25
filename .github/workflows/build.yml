@@ -1,0 +1,33 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        shell: powershell
+        run: |
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+          .\build.ps1
+
+      - name: Show exe version
+        shell: powershell
+        run: |
+          $info = (Get-Item '.\dist\DeepSeekHarnessTray.exe').VersionInfo
+          $info | Format-List FileDescription, FileVersion, ProductVersion
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DeepSeekHarnessTray
+          path: dist\DeepSeekHarnessTray.exe
+          if-no-files-found: error

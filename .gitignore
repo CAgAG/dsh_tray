@@ -1,0 +1,14 @@
+# 构建与打包产物
+/dist/
+/build/
+/.release/
+/.test/
+/.tmp/
+/release/
+
+# IDE / 系统临时文件
+.vs/
+*.user
+*.suo
+Thumbs.db
+Desktop.ini

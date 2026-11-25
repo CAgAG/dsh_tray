@@ -1,0 +1,13 @@
+* text=auto
+
+# Windows 脚本与源码按 CRLF 检出，保证 cmd / csc 友好
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.cs text eol=crlf
+*.manifest text eol=crlf
+
+# 文档与配置按 LF
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
