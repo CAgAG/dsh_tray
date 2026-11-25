@@ -1,48 +1,50 @@
-# DeepSeek Harness 托盘启动器
+# DeepSeek Harness Tray Launcher
 
-Windows 托盘小工具：双击启动 `dsh web`，托盘图标显示运行状态，可打开页面、重启、停止，并避免重复启动。
+**English** | [简体中文](README.zh-CN.md)
 
-[下载最新 Release](https://github.com/CAgAG/dsh_tray/releases/latest)
+A tiny Windows tray app that starts `dsh web` with one double-click, shows its status in the tray, and can open, restart or stop it without ever starting a second instance.
 
-## 功能
+[Download the latest release](https://github.com/CAgAG/dsh_tray/releases/latest)
 
-- 双击即启动 DSH（等价 `npx @deepseek-ai/dsh web`，没有命令行窗口）
-- 托盘图标显示状态：绿=运行中，蓝=外部实例，黄=启动/停止中，红=失败，灰=已停止
-- 左键/双击打开页面（自动使用启动时的 token 地址，避免 401）
-- 右键菜单：打开页面、复制地址、重启、停止、查看日志、编辑配置、开机自启、退出
-- 单实例；已有 DSH 时自动接管，不会重复启动
-- 退出托盘只关图标，DSH 继续运行，下次启动自动接管
+## Features
 
-## 环境要求
+- Double-click to start DSH (same as `npx @deepseek-ai/dsh web`, no console window)
+- Tray icon shows status: green = running, blue = external instance, yellow = starting/stopping, red = failed, grey = stopped
+- Left-click or double-click opens the page using the launch token (avoids the 401 page)
+- Right-click menu: open page, copy URL, restart, stop, view logs, edit config, start with Windows, quit
+- Single instance; attaches to an already running DSH instead of starting another one
+- Quitting only removes the tray icon: DSH keeps running and is adopted on the next launch
+
+## Requirements
 
 - Windows 10/11
 - Node.js ≥ 24.9
-- 至少成功运行过一次 `npx @deepseek-ai/dsh web`
+- At least one successful `npx @deepseek-ai/dsh web` run
 
-## 安装与使用
+## Install and use
 
-1. 运行 `install.cmd`（或双击 `dist\DeepSeekHarnessTray.exe`）。
-2. 双击桌面「DeepSeek Harness」。
-3. 首次运行在 `%LOCALAPPDATA%\DeepSeekHarnessTray` 生成配置与日志。
+1. Run `install.cmd` (or launch `dist\DeepSeekHarnessTray.exe` directly).
+2. Double-click "DeepSeek Harness" on the desktop.
+3. On first run, config and logs are created in `%LOCALAPPDATA%\DeepSeekHarnessTray`.
 
-## 配置与日志
+## Config and logs
 
-- 配置：`%LOCALAPPDATA%\DeepSeekHarnessTray\config.ini`（端口、监听地址、自动打开页面等）
-- 日志：`launcher.log`（启动器）、`dsh-web.log`（DSH 输出）
-- 停止 DSH：托盘菜单「停止 DSH」，或运行 `DeepSeekHarnessTray.exe --stop`
-- 其他命令：`--status`、`--diagnose`、`--start`、`--stop`、`--restart`、`--quit`
+- Config: `%LOCALAPPDATA%\DeepSeekHarnessTray\config.ini` (port, bind address, auto-open, ...)
+- Logs: `launcher.log` (launcher), `dsh-web.log` (DSH output)
+- Stop DSH: tray menu → "Stop DSH", or run `DeepSeekHarnessTray.exe --stop`
+- Other commands: `--status`, `--diagnose`, `--start`, `--stop`, `--restart`, `--quit`
 
-## 从源码构建
+## Build from source
 
-需要 Windows 自带的 .NET Framework 4.x（含 `csc.exe`）：
+Requires the .NET Framework 4.x that ships with Windows (includes `csc.exe`):
 
 ```bat
 build.cmd
 ```
 
-产物：`dist\DeepSeekHarnessTray.exe`。
+Output: `dist\DeepSeekHarnessTray.exe`.
 
-## 发布
+## Release
 
 ```bat
 .\bump-version.cmd 1.2.0
@@ -51,12 +53,12 @@ git commit -m "release: v1.2.0"
 .\release.cmd 1.2.0 -Push
 ```
 
-`-Push` 推送 tag，由 GitHub Actions 构建 exe 并创建 Release；本地直接发布可用 `-Manual`。
+`-Push` pushes the tag; GitHub Actions builds the exe and creates the release. Use `-Manual` to publish directly from the local machine.
 
-## 常见问题
+## Troubleshooting
 
-- **点快捷方式没反应**：确认任务管理器里没有残留的 `DeepSeekHarnessTray`；不要从 DSH 终端或沙箱里运行 `dist` 下的 exe。
-- **页面提示需要验证 / 401**：当前是命令行启动的外部实例，用托盘菜单「重启 DSH」接管。
-- **端口被占用**：会自动改用随机端口，也可在 `config.ini` 修改 `port`。
+- **The shortcut seems to do nothing**: check Task Manager for a leftover `DeepSeekHarnessTray` process; do not run the exe from DSH's terminal or a sandbox.
+- **The page asks for re-authentication / 401**: it is an external instance started from a terminal; use tray menu → "Restart DSH" to take it over.
+- **Port already in use**: the launcher falls back to a random port; you can also change `port` in `config.ini`.
 
-版本历史见 [CHANGELOG.md](CHANGELOG.md)。
+See [CHANGELOG.md](CHANGELOG.md) for version history.
