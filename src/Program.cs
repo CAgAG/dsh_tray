@@ -14,6 +14,7 @@ namespace DshTray
             try { Native.SetProcessDPIAware(); }
             catch { }
             ConfigureConsoleEncoding();
+            Strings.Initialize("auto");
 
             CliOptions options;
             try
@@ -40,7 +41,7 @@ namespace DshTray
             }
             catch (Exception ex)
             {
-                return Fail("\u65e0\u6cd5\u521b\u5efa\u6570\u636e\u76ee\u5f55\uff1a" + ex.Message);
+                return Fail(Strings.T("\u65e0\u6cd5\u521b\u5efa\u6570\u636e\u76ee\u5f55\uff1a", "Cannot create the data directory: ") + ex.Message);
             }
 
             // A tray started from a restricted shell/sandbox cannot write its data
@@ -58,12 +59,17 @@ namespace DshTray
                 catch
                 {
                 }
-                return Fail("\u65e0\u6cd5\u5199\u5165\u6570\u636e\u76ee\u5f55\uff1a\r\n" + dataDir
-                    + "\r\n\r\n\u8bf7\u4ece\u684c\u9762\u300cDeepSeek Harness\u300d\u5feb\u6377\u65b9\u5f0f\u542f\u52a8\uff0c"
-                    + "\u4e0d\u8981\u5728\u53d7\u9650\u7ec8\u7aef\u6216\u6c99\u7bb1\u91cc\u8fd0\u884c\u3002");
+                return Fail(Strings.T(
+                    "\u65e0\u6cd5\u5199\u5165\u6570\u636e\u76ee\u5f55\uff1a\r\n" + dataDir
+                        + "\r\n\r\n\u8bf7\u4ece\u684c\u9762\u300cDeepSeek Harness\u300d\u5feb\u6377\u65b9\u5f0f\u542f\u52a8\uff0c"
+                        + "\u4e0d\u8981\u5728\u53d7\u9650\u7ec8\u7aef\u6216\u6c99\u7bb1\u91cc\u8fd0\u884c\u3002",
+                    "Cannot write to the data directory:\r\n" + dataDir
+                        + "\r\n\r\nStart it from the desktop shortcut \"DeepSeek Harness\"; "
+                        + "do not run it from a restricted terminal or a sandbox."));
             }
 
             Config config = Config.Load(AppPaths.ConfigFile(dataDir));
+            Strings.Initialize(config.Language);
             if (options.Port > 0) config.Port = options.Port;
             Logger log = new Logger(dataDir);
 
@@ -100,7 +106,7 @@ namespace DshTray
                     log.Error("unhandled UI exception: " + e.Exception);
                     try
                     {
-                        MessageBox.Show("\u542f\u52a8\u5668\u9047\u5230\u9519\u8bef\uff1a\r\n" + e.Exception.Message, AppPaths.DisplayName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Strings.T("\u542f\u52a8\u5668\u9047\u5230\u9519\u8bef\uff1a\r\n", "Launcher error:\r\n") + e.Exception.Message, Strings.T("DeepSeek Harness \u6258\u76d8", "DeepSeek Harness Tray"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     catch
                     {
@@ -121,7 +127,7 @@ namespace DshTray
                     log.Error("fatal: " + ex);
                     try
                     {
-                        MessageBox.Show("\u542f\u52a8\u5668\u65e0\u6cd5\u542f\u52a8\uff1a\r\n" + ex.Message, AppPaths.DisplayName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Strings.T("\u542f\u52a8\u5668\u65e0\u6cd5\u542f\u52a8\uff1a\r\n", "The launcher could not start:\r\n") + ex.Message, Strings.T("DeepSeek Harness \u6258\u76d8", "DeepSeek Harness Tray"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     catch
                     {
@@ -170,7 +176,7 @@ namespace DshTray
             {
                 if (Environment.UserInteractive)
                 {
-                    MessageBox.Show(message, AppPaths.DisplayName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(message, Strings.T("DeepSeek Harness \u6258\u76d8", "DeepSeek Harness Tray"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch

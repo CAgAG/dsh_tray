@@ -16,6 +16,7 @@ namespace DshTray
         public string NodePath = "";
         public string DshEntry = "";
         public string WorkingDirectory = "";
+        public string Language = "auto";
         public bool OpenOnReady = true;
         public bool StartOnLaunch = true;
         public bool FallbackRandomPort = true;
@@ -79,6 +80,7 @@ namespace DshTray
                         case "nodepath": config.NodePath = value; break;
                         case "dshentry": config.DshEntry = value; break;
                         case "workingdir": config.WorkingDirectory = value; break;
+                        case "language": config.Language = value; break;
                         case "openonready": config.OpenOnReady = Util.ParseBool(value, config.OpenOnReady); break;
                         case "startonlaunch": config.StartOnLaunch = Util.ParseBool(value, config.StartOnLaunch); break;
                         case "fallbackrandomport": config.FallbackRandomPort = Util.ParseBool(value, config.FallbackRandomPort); break;
@@ -92,6 +94,7 @@ namespace DshTray
 
             if (config.Port < 0 || config.Port > 65535) config.Port = 3080;
             if (string.IsNullOrEmpty(config.Host)) config.Host = "127.0.0.1";
+            if (string.IsNullOrEmpty(config.Language)) config.Language = "auto";
             if (config.LaunchTimeoutSeconds < 30) config.LaunchTimeoutSeconds = 30;
             return config;
         }
@@ -116,6 +119,8 @@ namespace DshTray
             sb.AppendLine("dshEntry=" + DshEntry);
             sb.AppendLine("# DSH \u8fdb\u7a0b\u5de5\u4f5c\u76ee\u5f55\uff1b\u7559\u7a7a\u7528\u7528\u6237\u76ee\u5f55");
             sb.AppendLine("workingDir=" + WorkingDirectory);
+            sb.AppendLine("# UI language: auto / en / zh\uff08\u754c\u9762\u8bed\u8a00\uff1a\u81ea\u52a8 / \u82f1\u6587 / \u4e2d\u6587\uff09");
+            sb.AppendLine("language=" + Language);
             sb.AppendLine("# DSH \u5c31\u7eea\u540e\u81ea\u52a8\u6253\u5f00\u9875\u9762");
             sb.AppendLine("openOnReady=" + (OpenOnReady ? "true" : "false"));
             sb.AppendLine("# \u542f\u52a8\u6258\u76d8\u65f6\u81ea\u52a8\u542f\u52a8 DSH");

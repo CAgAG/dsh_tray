@@ -22,7 +22,7 @@ namespace DshTray
     internal sealed class StatusSnapshot
     {
         public DshState State = DshState.Stopped;
-        public string Message = "\u5df2\u505c\u6b62";
+        public string Message = Strings.T("\u5df2\u505c\u6b62", "Stopped");
         public string CleanUrl = "";
         public string AuthUrl = "";
         public string Error = "";
@@ -56,7 +56,7 @@ namespace DshTray
         private Process _proc;
         private int _tailGeneration;
         private DshState _state = DshState.Stopped;
-        private string _message = "\u5df2\u505c\u6b62";
+        private string _message = Strings.T("\u5df2\u505c\u6b62", "Stopped");
         private string _cleanUrl;
         private string _authUrl;
         private string _error = "";
@@ -189,7 +189,7 @@ namespace DshTray
             catch (Exception ex)
             {
                 _log.Error("initialize failed: " + ex);
-                SetError("初始化失败：" + ex.Message);
+                SetError(Strings.T("初始化失败：", "Initialization failed: ") + ex.Message);
             }
 
             int tick = 0;
@@ -284,7 +284,7 @@ namespace DshTray
             lock (_gate)
             {
                 _state = DshState.Starting;
-                _message = "\u542f\u52a8\u4e2d\u2026";
+                _message = Strings.T("\u542f\u52a8\u4e2d\u2026", "Starting...");
                 _error = "";
                 _authUrl = null;
                 _opened = false;
@@ -317,7 +317,7 @@ namespace DshTray
                     }
                     else
                     {
-                        SetError("端口 " + _cfg.Port + " 已被其他程序占用，请在配置文件中修改 port。");
+                        SetError(Strings.Format("端口 {0} 已被其他程序占用，请在配置文件中修改 port。", "Port {0} is already in use; change \"port\" in the config file.", _cfg.Port));
                         return;
                     }
                 }
@@ -341,7 +341,7 @@ namespace DshTray
             }
             catch (Exception ex)
             {
-                SetError("无法启动 DSH：" + ex.Message);
+                SetError(Strings.T("无法启动 DSH：", "Could not start DSH: ") + ex.Message);
                 return;
             }
 
@@ -499,7 +499,7 @@ namespace DshTray
                 if (_state == DshState.Starting)
                 {
                     _state = DshState.Running;
-                    _message = "\u8fd0\u884c\u4e2d";
+                    _message = Strings.T("\u8fd0\u884c\u4e2d", "Running");
                     _error = "";
                     becameReady = true;
                 }
@@ -593,7 +593,7 @@ namespace DshTray
                     {
                         _log.Warn("DSH did not become ready within " + _cfg.LaunchTimeoutSeconds + "s");
                         StopInternal();
-                        SetError("DSH 启动超时（" + _cfg.LaunchTimeoutSeconds + " 秒），请查看日志排查。");
+                        SetError(Strings.Format("DSH 启动超时（{0} 秒），请查看日志排查。", "DSH did not become ready within {0} seconds; check the logs.", _cfg.LaunchTimeoutSeconds));
                     }
                     break;
 
@@ -609,7 +609,7 @@ namespace DshTray
                             _probeFailures++;
                             if (process == null && _probeFailures >= 3)
                             {
-                                MarkStopped("DSH \u5df2\u505c\u6b62");
+                                MarkStopped(Strings.T("DSH \u5df2\u505c\u6b62", "DSH stopped"));
                             }
                             else if (_probeFailures == 10)
                             {
@@ -629,7 +629,7 @@ namespace DshTray
                         else
                         {
                             _probeFailures++;
-                            if (_probeFailures >= 3) MarkStopped("\u5916\u90e8 DSH \u5df2\u505c\u6b62");
+                            if (_probeFailures >= 3) MarkStopped(Strings.T("\u5916\u90e8 DSH \u5df2\u505c\u6b62", "External DSH stopped"));
                         }
                     }
                     break;
@@ -641,7 +641,7 @@ namespace DshTray
                         ProbeResult idle = Probe.Run(_cfg.CleanUrl, 900);
                         if (idle.IsDsh) AttachRunning(idle);
                         else if (idle.PortInUse) { if (state == DshState.Stopped) SetConflict(); }
-                        else if (state == DshState.Conflict) MarkStopped("\u5df2\u505c\u6b62");
+                        else if (state == DshState.Conflict) MarkStopped(Strings.T("\u5df2\u505c\u6b62", "Stopped"));
                     }
                     break;
             }
@@ -655,7 +655,7 @@ namespace DshTray
                 if (_state != DshState.Running)
                 {
                     _state = DshState.Running;
-                    _message = "\u8fd0\u884c\u4e2d";
+                    _message = Strings.T("\u8fd0\u884c\u4e2d", "Running");
                     _error = "";
                     changed = true;
                 }
@@ -673,7 +673,7 @@ namespace DshTray
                 _authUrl = null;
                 _managed = false;
                 _state = DshState.Stopped;
-                _message = string.IsNullOrEmpty(message) ? "\u5df2\u505c\u6b62" : message;
+                _message = string.IsNullOrEmpty(message) ? Strings.T("\u5df2\u505c\u6b62", "Stopped") : message;
                 _error = "";
                 _probeFailures = 0;
                 _opened = false;
@@ -712,7 +712,7 @@ namespace DshTray
                 lock (_gate)
                 {
                     _state = DshState.Stopped;
-                    _message = "\u5df2\u505c\u6b62";
+                    _message = Strings.T("\u5df2\u505c\u6b62", "Stopped");
                     _error = "";
                     _intentionalStop = false;
                 }
@@ -722,12 +722,12 @@ namespace DshTray
             {
                 string tail = _log.TailDsh(8);
                 string reason = LastMeaningfulLine(tail);
-                string message = "DSH \u610f\u5916\u9000\u51fa\uff08\u4ee3\u7801 " + exitCode.ToString(CultureInfo.InvariantCulture) + "\uff09";
-                if (!string.IsNullOrEmpty(reason)) message += "\uff1a" + reason;
+                string message = Strings.Format("DSH \u610f\u5916\u9000\u51fa\uff08\u4ee3\u7801 {0}\uff09", "DSH exited unexpectedly (code {0})", exitCode);
+                if (!string.IsNullOrEmpty(reason)) message += Strings.T("\uff1a", ": ") + reason;
                 lock (_gate)
                 {
                     _state = DshState.Error;
-                    _message = "\u542f\u52a8\u5931\u8d25";
+                    _message = Strings.T("\u542f\u52a8\u5931\u8d25", "Failed to start");
                     _error = message;
                 }
                 _log.Error(message + Environment.NewLine + tail);
@@ -778,7 +778,7 @@ namespace DshTray
                 _tailGeneration++;
                 _intentionalStop = true;
                 _state = DshState.Stopping;
-                _message = "\u6b63\u5728\u505c\u6b62\u2026";
+                _message = Strings.T("\u6b63\u5728\u505c\u6b62\u2026", "Stopping...");
                 _authUrl = null;
                 _openWhenReady = false;
             }
@@ -815,14 +815,14 @@ namespace DshTray
             bool stillAlive = targetPid > 0 && IsProcessAlive(targetPid);
             if (stillAlive)
             {
-                string message = "\u65e0\u6cd5\u7ed3\u675f DSH \u8fdb\u7a0b\uff08PID " + targetPid.ToString(CultureInfo.InvariantCulture) + "\uff09\uff0c\u53ef\u80fd\u9700\u8981\u7ba1\u7406\u5458\u6743\u9650\u3002";
+                string message = Strings.Format("\u65e0\u6cd5\u7ed3\u675f DSH \u8fdb\u7a0b\uff08PID {0}\uff09\uff0c\u53ef\u80fd\u9700\u8981\u7ba1\u7406\u5458\u6743\u9650\u3002", "Could not stop the DSH process (PID {0}); administrator rights may be required.", targetPid);
                 lock (_gate)
                 {
                     _proc = null;
                     _pid = targetPid;
                     _managed = false;
                     _state = DshState.Error;
-                    _message = "\u505c\u6b62\u5931\u8d25";
+                    _message = Strings.T("\u505c\u6b62\u5931\u8d25", "Stop failed");
                     _error = message;
                     _intentionalStop = false;
                     _probeFailures = 0;
@@ -839,7 +839,7 @@ namespace DshTray
                 _pid = 0;
                 _managed = false;
                 _state = DshState.Stopped;
-                _message = "\u5df2\u505c\u6b62";
+                _message = Strings.T("\u5df2\u505c\u6b62", "Stopped");
                 _error = "";
                 _probeFailures = 0;
                 _intentionalStop = false;
@@ -959,7 +959,7 @@ namespace DshTray
                     _startedAt = state.StartedAt;
                     _managed = true;
                     _state = DshState.Running;
-                    _message = "\u8fd0\u884c\u4e2d";
+                    _message = Strings.T("\u8fd0\u884c\u4e2d", "Running");
                     _error = "";
                 }
                 _log.Info("adopted previous DSH process pid=" + state.Pid);
@@ -979,7 +979,7 @@ namespace DshTray
                 _managed = false;
                 _cleanUrl = _cfg.CleanUrl;
                 _state = DshState.External;
-                _message = "\u8fd0\u884c\u4e2d\uff08\u5916\u90e8\u5b9e\u4f8b\uff09";
+                _message = Strings.T("\u8fd0\u884c\u4e2d\uff08\u5916\u90e8\u5b9e\u4f8b\uff09", "Running (external)");
                 _error = "";
             }
             _log.Info("attached to external DSH at " + _cfg.CleanUrl + " pid=" + owner + " probe=" + (probe != null ? probe.StatusCode.ToString(CultureInfo.InvariantCulture) : "?"));
@@ -1018,7 +1018,7 @@ namespace DshTray
                 _authUrl = null;
                 _managed = false;
                 _state = DshState.Error;
-                _message = "\u542f\u52a8\u5931\u8d25";
+                _message = Strings.T("\u542f\u52a8\u5931\u8d25", "Failed to start");
                 _error = message;
                 _probeFailures = 0;
                 _opened = false;
@@ -1032,8 +1032,8 @@ namespace DshTray
             lock (_gate)
             {
                 _state = DshState.Conflict;
-                _message = "\u7aef\u53e3\u88ab\u5360\u7528";
-                _error = "端口 " + _cfg.Port.ToString(CultureInfo.InvariantCulture) + " 已被其他程序占用";
+                _message = Strings.T("\u7aef\u53e3\u88ab\u5360\u7528", "Port in use");
+                _error = Strings.Format("端口 {0} 已被其他程序占用", "Port {0} is already in use", _cfg.Port);
             }
             RaiseChanged();
         }

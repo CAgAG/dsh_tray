@@ -74,7 +74,7 @@ namespace DshTray
 
         private static string NextValue(List<string> tokens, ref int index, string name)
         {
-            if (index + 1 >= tokens.Count) throw new ArgumentException(name + " \u540e\u9762\u9700\u8981\u4e00\u4e2a\u53c2\u6570");
+            if (index + 1 >= tokens.Count) throw new ArgumentException(Strings.T(name + " 后面需要一个参数", name + " requires a value"));
             index++;
             return tokens[index];
         }
@@ -85,24 +85,35 @@ namespace DshTray
         public static void PrintHelp()
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("DeepSeek Harness \u6258\u76d8\u542f\u52a8\u5668 " + AppPaths.Version);
+            sb.AppendLine(Strings.T("DeepSeek Harness 托盘启动器 ", "DeepSeek Harness Tray ") + AppPaths.Version);
             sb.AppendLine();
-            sb.AppendLine("\u7528\u6cd5\uff1a");
-            sb.AppendLine("  DeepSeekHarnessTray.exe                  \u542f\u52a8\u6258\u76d8\uff08\u5e76\u81ea\u52a8\u542f\u52a8 DSH\uff09");
-            sb.AppendLine("  DeepSeekHarnessTray.exe --autostart      \u5f00\u673a\u81ea\u542f\u6a21\u5f0f\uff08\u4e0d\u81ea\u52a8\u5f39\u6d4f\u89c8\u5668\uff09");
-            sb.AppendLine("  DeepSeekHarnessTray.exe --status         \u8f93\u51fa\u5f53\u524d\u72b6\u6001\uff08\u5df2\u8fd0\u884c\u65f6\u9000\u51fa\u7801 0\uff09");
-            sb.AppendLine("  DeepSeekHarnessTray.exe --diagnose       \u8f93\u51fa\u8bca\u65ad\u4fe1\u606f");
-            sb.AppendLine("  DeepSeekHarnessTray.exe --start          \u786e\u4fdd DSH \u5df2\u542f\u52a8");
-            sb.AppendLine("  DeepSeekHarnessTray.exe --stop           \u505c\u6b62 DSH");
-            sb.AppendLine("  DeepSeekHarnessTray.exe --restart        \u91cd\u542f DSH");
-            sb.AppendLine("  DeepSeekHarnessTray.exe --open           \u6253\u5f00 DSH \u9875\u9762");
-            sb.AppendLine("  DeepSeekHarnessTray.exe --quit           \u9000\u51fa\u6258\u76d8\uff08DSH \u4fdd\u6301\u8fd0\u884c\uff09");
+            sb.AppendLine(Strings.T("用法：", "Usage:"));
+            sb.AppendLine(Strings.T("  DeepSeekHarnessTray.exe                  启动托盘（并自动启动 DSH）",
+                "  DeepSeekHarnessTray.exe                  Start the tray (and start DSH)"));
+            sb.AppendLine(Strings.T("  DeepSeekHarnessTray.exe --autostart      开机自启模式（不自动弹浏览器）",
+                "  DeepSeekHarnessTray.exe --autostart      Autostart mode (no automatic browser)"));
+            sb.AppendLine(Strings.T("  DeepSeekHarnessTray.exe --status         输出当前状态（已运行时退出码 0）",
+                "  DeepSeekHarnessTray.exe --status         Print current status (exit 0 when running)"));
+            sb.AppendLine(Strings.T("  DeepSeekHarnessTray.exe --diagnose       输出诊断信息",
+                "  DeepSeekHarnessTray.exe --diagnose       Print diagnostics"));
+            sb.AppendLine(Strings.T("  DeepSeekHarnessTray.exe --start          确保 DSH 已启动",
+                "  DeepSeekHarnessTray.exe --start          Ensure DSH is running"));
+            sb.AppendLine(Strings.T("  DeepSeekHarnessTray.exe --stop           停止 DSH",
+                "  DeepSeekHarnessTray.exe --stop           Stop DSH"));
+            sb.AppendLine(Strings.T("  DeepSeekHarnessTray.exe --restart        重启 DSH",
+                "  DeepSeekHarnessTray.exe --restart        Restart DSH"));
+            sb.AppendLine(Strings.T("  DeepSeekHarnessTray.exe --open           打开 DSH 页面",
+                "  DeepSeekHarnessTray.exe --open           Open the DSH page"));
+            sb.AppendLine(Strings.T("  DeepSeekHarnessTray.exe --quit           退出托盘（DSH 保持运行）",
+                "  DeepSeekHarnessTray.exe --quit           Quit the tray (DSH keeps running)"));
             sb.AppendLine();
-            sb.AppendLine("\u9009\u9879\uff1a");
-            sb.AppendLine("  --data <\u76ee\u5f55>   \u6570\u636e\u76ee\u5f55\uff08\u9ed8\u8ba4 %LOCALAPPDATA%\\" + AppPaths.AppName + "\uff09");
-            sb.AppendLine("  --port <\u7aef\u53e3>   \u8986\u76d6\u914d\u7f6e\u4e2d\u7684\u7aef\u53e3");
-            sb.AppendLine("  --silent      \u4e0d\u5f39\u4efb\u4f55\u6c14\u6ce1\u63d0\u793a\uff0c\u4e0d\u81ea\u52a8\u6253\u5f00\u6d4f\u89c8\u5668");
-            sb.AppendLine("  --out <\u6587\u4ef6>   \u540c\u65f6\u628a\u8f93\u51fa\u5199\u5165\u6307\u5b9a\u6587\u4ef6");
+            sb.AppendLine(Strings.T("选项：", "Options:"));
+            sb.AppendLine(Strings.T("  --data <目录>   数据目录（默认 %LOCALAPPDATA%\\", "  --data <dir>    Data directory (default %LOCALAPPDATA%\\")
+                + AppPaths.AppName + ")");
+            sb.AppendLine(Strings.T("  --port <端口>   覆盖配置中的端口", "  --port <port>   Override the configured port"));
+            sb.AppendLine(Strings.T("  --silent      不弹任何气泡提示，不自动打开浏览器",
+                "  --silent        No balloon tips, no automatic browser"));
+            sb.AppendLine(Strings.T("  --out <文件>   同时把输出写入指定文件", "  --out <file>    Also write the output to a file"));
             Console.Write(sb.ToString());
         }
 
@@ -231,6 +242,7 @@ namespace DshTray
             sb.AppendLine("fallbackRandomPort=" + (config.FallbackRandomPort ? "true" : "false"));
             sb.AppendLine("trayWindow=" + (FindTrayWindow(0) != IntPtr.Zero ? "present" : "absent"));
             sb.AppendLine("dataWritable=" + (AppPaths.CanWriteDirectory(dataDir) ? "true" : "false"));
+            sb.AppendLine("language=" + Strings.LanguageTag);
             sb.AppendLine("launcherLog=" + log.LogPath);
             sb.AppendLine("dshLog=" + log.DshLogPath);
             sb.AppendLine();
@@ -239,7 +251,7 @@ namespace DshTray
             try
             {
                 string node = resolver.ResolveNode();
-                sb.AppendLine("node=" + (node ?? "(\u672a\u627e\u5230)"));
+                sb.AppendLine("node=" + (node ?? Strings.T("(未找到)", "(not found)")));
             }
             catch (Exception ex)
             {
@@ -251,7 +263,7 @@ namespace DshTray
                 string version;
                 string source;
                 string entry = resolver.ResolveDshEntry(out version, out source);
-                sb.AppendLine("dshEntry=" + (entry ?? "(\u672a\u627e\u5230)"));
+                sb.AppendLine("dshEntry=" + (entry ?? Strings.T("(未找到)", "(not found)")));
                 sb.AppendLine("dshVersion=" + version);
                 sb.AppendLine("dshSource=" + source);
             }

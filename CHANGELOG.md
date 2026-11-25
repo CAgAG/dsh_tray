@@ -2,6 +2,13 @@
 
 所有重要变动记录在这里。版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.2.0] - 2026-11-25
+
+### Added
+
+- Bilingual UI (English / Chinese) for the tray menu, status line, tooltips, balloon tips, confirmation dialogs and CLI help.
+- `language=auto|en|zh` in `config.ini` (default `auto` follows the Windows UI language; `DSHTRAY_LANG` overrides it for CLI/testing).
+
 ## [1.1.1] - 2026-11-25
 
 ### Fixed

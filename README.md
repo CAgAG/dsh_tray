@@ -30,6 +30,7 @@ A tiny Windows tray app that starts `dsh web` with one double-click, shows its s
 ## Config and logs
 
 - Config: `%LOCALAPPDATA%\DeepSeekHarnessTray\config.ini` (port, bind address, auto-open, ...)
+- UI language: `language=auto` (follow Windows), `en`, or `zh` in `config.ini`
 - Logs: `launcher.log` (launcher), `dsh-web.log` (DSH output)
 - Stop DSH: tray menu → "Stop DSH", or run `DeepSeekHarnessTray.exe --stop`
 - Other commands: `--status`, `--diagnose`, `--start`, `--stop`, `--restart`, `--quit`

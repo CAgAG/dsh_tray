@@ -30,6 +30,7 @@ Windows 托盘小工具：双击启动 `dsh web`，托盘图标显示运行状�
 ## 配置与日志
 
 - 配置：`%LOCALAPPDATA%\DeepSeekHarnessTray\config.ini`（端口、监听地址、自动打开页面等）
+- 界面语言：`config.ini` 里 `language=auto`（跟随系统）/ `en` / `zh`
 - 日志：`launcher.log`（启动器）、`dsh-web.log`（DSH 输出）
 - 停止 DSH：托盘菜单「停止 DSH」，或运行 `DeepSeekHarnessTray.exe --stop`
 - 其他命令：`--status`、`--diagnose`、`--start`、`--stop`、`--restart`、`--quit`

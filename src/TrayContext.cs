@@ -53,17 +53,17 @@ namespace DshTray
             _hidden.MessageReceived += OnTrayMessage;
             IntPtr created = _hidden.Handle; // force the message window into existence
 
-            _statusItem = new ToolStripMenuItem("DSH\uff1a\u6b63\u5728\u68c0\u6d4b\u2026");
+            _statusItem = new ToolStripMenuItem(Strings.T("DSH：正在检测…", "DSH: detecting..."));
             _statusItem.Enabled = false;
-            _openItem = new ToolStripMenuItem("\u6253\u5f00\u9875\u9762", null, delegate { HandlePrimaryAction(); });
-            _copyItem = new ToolStripMenuItem("\u590d\u5236\u9875\u9762\u5730\u5740", null, delegate { CopyUrl(); });
-            _restartItem = new ToolStripMenuItem("\u91cd\u542f DSH", null, delegate { RestartServer(); });
-            _stopItem = new ToolStripMenuItem("\u505c\u6b62 DSH", null, delegate { StopServer(); });
-            _logsItem = new ToolStripMenuItem("\u67e5\u770b\u65e5\u5fd7", null, delegate { OpenFile(_log.LogPath); });
-            _configItem = new ToolStripMenuItem("\u7f16\u8f91\u914d\u7f6e", null, delegate { OpenFile(_cfg.ConfigPath); });
-            _folderItem = new ToolStripMenuItem("\u6253\u5f00\u6570\u636e\u6587\u4ef6\u5939", null, delegate { OpenFolder(Path.GetDirectoryName(_log.LogPath)); });
-            _autoItem = new ToolStripMenuItem("\u5f00\u673a\u81ea\u52a8\u542f\u52a8", null, delegate { ToggleAutoStart(); });
-            _exitItem = new ToolStripMenuItem("\u9000\u51fa\uff08DSH \u7ee7\u7eed\u8fd0\u884c\uff09", null, delegate { BeginQuit(false); });
+            _openItem = new ToolStripMenuItem(Strings.T("打开页面", "Open page"), null, delegate { HandlePrimaryAction(); });
+            _copyItem = new ToolStripMenuItem(Strings.T("复制页面地址", "Copy page URL"), null, delegate { CopyUrl(); });
+            _restartItem = new ToolStripMenuItem(Strings.T("重启 DSH", "Restart DSH"), null, delegate { RestartServer(); });
+            _stopItem = new ToolStripMenuItem(Strings.T("停止 DSH", "Stop DSH"), null, delegate { StopServer(); });
+            _logsItem = new ToolStripMenuItem(Strings.T("查看日志", "View logs"), null, delegate { OpenFile(_log.LogPath); });
+            _configItem = new ToolStripMenuItem(Strings.T("编辑配置", "Edit config"), null, delegate { OpenFile(_cfg.ConfigPath); });
+            _folderItem = new ToolStripMenuItem(Strings.T("打开数据文件夹", "Open data folder"), null, delegate { OpenFolder(Path.GetDirectoryName(_log.LogPath)); });
+            _autoItem = new ToolStripMenuItem(Strings.T("开机自动启动", "Start with Windows"), null, delegate { ToggleAutoStart(); });
+            _exitItem = new ToolStripMenuItem(Strings.T("退出（DSH 继续运行）", "Quit (keep DSH running)"), null, delegate { BeginQuit(false); });
 
             _menu = new ContextMenuStrip();
             _menu.Items.AddRange(new ToolStripItem[]
@@ -88,7 +88,7 @@ namespace DshTray
 
             _icon = new NotifyIcon();
             _icon.Icon = GetIcon(DshState.Stopped);
-            _icon.Text = "DSH \u5df2\u505c\u6b62";
+            _icon.Text = Strings.T("DSH 已停止", "DSH stopped");
             _icon.ContextMenuStrip = _menu;
             _icon.Visible = true;
             _icon.MouseClick += OnIconMouseClick;
@@ -106,7 +106,7 @@ namespace DshTray
             UpdateUi();
             _ctl.StartWorker();
             _log.Info("tray context created (silent=" + _silent + ")");
-            if (!_silent) ShowBalloon("DeepSeek Harness", "\u6258\u76d8\u5df2\u5c31\u7eea\uff0c\u6b63\u5728\u68c0\u6d4b DSH\u2026", ToolTipIcon.Info);
+            if (!_silent) ShowBalloon("DeepSeek Harness", Strings.T("托盘已就绪，正在检测 DSH…", "Tray ready, detecting DSH..."), ToolTipIcon.Info);
         }
 
         private Icon GetIcon(DshState state)
@@ -159,7 +159,9 @@ namespace DshTray
 
                 bool live = snapshot.State == DshState.Running || snapshot.State == DshState.External;
                 bool busy = snapshot.State == DshState.Starting || snapshot.State == DshState.Stopping;
-                _openItem.Text = live ? "\u6253\u5f00\u9875\u9762" : (busy ? "\u6b63\u5728\u542f\u52a8\u2026" : "\u542f\u52a8 DSH");
+                _openItem.Text = live
+                    ? Strings.T("打开页面", "Open page")
+                    : (busy ? Strings.T("正在启动…", "Starting...") : Strings.T("启动 DSH", "Start DSH"));
                 _openItem.Enabled = !busy;
                 _copyItem.Enabled = live && (snapshot.AuthUrl.Length > 0 || snapshot.CleanUrl.Length > 0);
                 _restartItem.Enabled = !busy;
@@ -188,19 +190,19 @@ namespace DshTray
             switch (snapshot.State)
             {
                 case DshState.Running:
-                    return "DSH \u8fd0\u884c\u4e2d \u00b7 " + Util.DisplayUrl(snapshot.CleanUrl) + (snapshot.Pid > 0 ? " \u00b7 PID " + snapshot.Pid : "");
+                    return Strings.T("DSH 运行中 · ", "DSH running · ") + Util.DisplayUrl(snapshot.CleanUrl) + (snapshot.Pid > 0 ? " · PID " + snapshot.Pid : "");
                 case DshState.External:
-                    return "DSH \u8fd0\u884c\u4e2d\uff08\u5916\u90e8\u542f\u52a8\uff09\u00b7 " + Util.DisplayUrl(snapshot.CleanUrl);
+                    return Strings.T("DSH 运行中（外部启动）· ", "DSH running (external) · ") + Util.DisplayUrl(snapshot.CleanUrl);
                 case DshState.Starting:
-                    return "DSH \u542f\u52a8\u4e2d\u2026";
+                    return Strings.T("DSH 启动中…", "DSH starting...");
                 case DshState.Stopping:
-                    return "DSH \u6b63\u5728\u505c\u6b62\u2026";
+                    return Strings.T("DSH 正在停止…", "DSH stopping...");
                 case DshState.Error:
-                    return "DSH \u542f\u52a8\u5931\u8d25\uff1a" + Util.SingleLine(snapshot.Error);
+                    return Strings.T("DSH 启动失败：", "DSH failed to start: ") + Util.SingleLine(snapshot.Error);
                 case DshState.Conflict:
-                    return "\u7aef\u53e3\u88ab\u5360\u7528\uff1a" + Util.SingleLine(snapshot.Error);
+                    return Strings.T("端口被占用：", "Port in use: ") + Util.SingleLine(snapshot.Error);
                 default:
-                    return "DSH \u5df2\u505c\u6b62 \u2014 \u70b9\u51fb\u542f\u52a8";
+                    return Strings.T("DSH 已停止 — 点击启动", "DSH stopped — click to start");
             }
         }
 
@@ -209,25 +211,25 @@ namespace DshTray
             switch (snapshot.State)
             {
                 case DshState.Running:
-                    return "DSH\uff1a\u8fd0\u884c\u4e2d \u00b7 " + SafeUrl(snapshot.CleanUrl);
+                    return Strings.T("DSH：运行中 · ", "DSH: running · ") + SafeUrl(snapshot.CleanUrl);
                 case DshState.External:
-                    return "DSH\uff1a\u8fd0\u884c\u4e2d\uff08\u5916\u90e8\u5b9e\u4f8b\uff09\u00b7 " + SafeUrl(snapshot.CleanUrl);
+                    return Strings.T("DSH：运行中（外部实例）· ", "DSH: running (external) · ") + SafeUrl(snapshot.CleanUrl);
                 case DshState.Starting:
-                    return "DSH\uff1a\u542f\u52a8\u4e2d\u2026";
+                    return Strings.T("DSH：启动中…", "DSH: starting...");
                 case DshState.Stopping:
-                    return "DSH\uff1a\u6b63\u5728\u505c\u6b62\u2026";
+                    return Strings.T("DSH：正在停止…", "DSH: stopping...");
                 case DshState.Error:
-                    return "DSH\uff1a\u542f\u52a8\u5931\u8d25";
+                    return Strings.T("DSH：启动失败", "DSH: failed to start");
                 case DshState.Conflict:
-                    return "DSH\uff1a\u7aef\u53e3 " + _cfg.Port + " \u88ab\u5360\u7528";
+                    return Strings.Format("DSH：端口 {0} 被占用", "DSH: port {0} in use", _cfg.Port);
                 default:
-                    return "DSH\uff1a\u5df2\u505c\u6b62";
+                    return Strings.T("DSH：已停止", "DSH: stopped");
             }
         }
 
         private static string SafeUrl(string url)
         {
-            return string.IsNullOrEmpty(url) ? "\u968f\u673a\u7aef\u53e3" : url.TrimEnd('/');
+            return string.IsNullOrEmpty(url) ? Strings.T("随机端口", "random port") : url.TrimEnd('/');
         }
 
         private void NotifyTransition(DshState previous, StatusSnapshot snapshot)
@@ -236,22 +238,31 @@ namespace DshTray
             switch (snapshot.State)
             {
                 case DshState.Running:
-                    ShowBalloon("DSH \u5df2\u542f\u52a8", "\u9875\u9762\u5730\u5740\uff1a" + SafeUrl(snapshot.CleanUrl) + "\r\n\u53cc\u51fb\u6258\u76d8\u56fe\u6807\u5373\u53ef\u6253\u5f00", ToolTipIcon.Info);
+                    ShowBalloon(Strings.T("DSH 已启动", "DSH started"),
+                        Strings.T("页面地址：", "Page: ") + SafeUrl(snapshot.CleanUrl)
+                            + Strings.T("\r\n双击托盘图标即可打开", "\r\nDouble-click the tray icon to open it"),
+                        ToolTipIcon.Info);
                     break;
                 case DshState.External:
                     if (previous != DshState.External && !_externalHintShown)
                     {
                         _externalHintShown = true;
-                        ShowBalloon("\u68c0\u6d4b\u5230\u5df2\u8fd0\u884c\u7684 DSH", "\u8fd9\u4e2a\u5b9e\u4f8b\u7531\u547d\u4ee4\u884c\u542f\u52a8\u3002\u82e5\u9875\u9762\u8981\u6c42\u91cd\u65b0\u9a8c\u8bc1\uff0c\u8bf7\u7528\u83dc\u5355\u91cc\u7684\u300c\u91cd\u542f DSH\u300d\u7531\u6258\u76d8\u63a5\u7ba1\u3002", ToolTipIcon.Info);
+                        ShowBalloon(Strings.T("检测到已运行的 DSH", "Detected a running DSH"),
+                            Strings.T(
+                                "这个实例由命令行启动。若页面要求重新验证，请用菜单里的「重启 DSH」由托盘接管。",
+                                "This instance was started from a command line. If the page asks you to re-authenticate, use \"Restart DSH\" in the tray menu to take it over."),
+                            ToolTipIcon.Info);
                     }
                     break;
                 case DshState.Error:
-                    ShowBalloon("DSH \u542f\u52a8\u5931\u8d25", Util.Truncate(Util.SingleLine(snapshot.Error), 220), ToolTipIcon.Error);
+                    ShowBalloon(Strings.T("DSH 启动失败", "DSH failed to start"), Util.Truncate(Util.SingleLine(snapshot.Error), 220), ToolTipIcon.Error);
                     break;
                 case DshState.Stopped:
                     if (previous == DshState.Running || previous == DshState.External || previous == DshState.Starting)
                     {
-                        ShowBalloon("DSH \u5df2\u505c\u6b62", "\u70b9\u51fb\u6258\u76d8\u56fe\u6807\u53ef\u91cd\u65b0\u542f\u52a8\u3002", ToolTipIcon.Info);
+                        ShowBalloon(Strings.T("DSH 已停止", "DSH stopped"),
+                            Strings.T("点击托盘图标可重新启动。", "Click the tray icon to start it again."),
+                            ToolTipIcon.Info);
                     }
                     break;
             }
@@ -305,7 +316,9 @@ namespace DshTray
                     OpenPage();
                     break;
                 case DshState.Starting:
-                    ShowBalloon("DSH \u6b63\u5728\u542f\u52a8", "\u5c31\u7eea\u540e\u4f1a\u81ea\u52a8\u6253\u5f00\u9875\u9762\u3002", ToolTipIcon.Info);
+                    ShowBalloon(Strings.T("DSH 正在启动", "DSH is starting"),
+                        Strings.T("就绪后会自动打开页面。", "The page will open automatically when it is ready."),
+                        ToolTipIcon.Info);
                     break;
                 case DshState.Stopping:
                     break;
@@ -321,14 +334,19 @@ namespace DshTray
             string url = !string.IsNullOrEmpty(snapshot.AuthUrl) ? snapshot.AuthUrl : snapshot.CleanUrl;
             if (string.IsNullOrEmpty(url))
             {
-                ShowBalloon("\u9875\u9762\u5c1a\u672a\u5c31\u7eea", "\u8bf7\u7a0d\u7b49 DSH \u542f\u52a8\u5b8c\u6210\u540e\u518d\u8bd5\u3002", ToolTipIcon.Info);
+                ShowBalloon(Strings.T("页面尚未就绪", "The page is not ready yet"),
+                    Strings.T("请稍等 DSH 启动完成后再试。", "Please wait for DSH to finish starting."),
+                    ToolTipIcon.Info);
                 return;
             }
             _ctl.OpenUrl(url);
             if (snapshot.State == DshState.External && string.IsNullOrEmpty(snapshot.AuthUrl) && !_externalHintShown)
             {
                 _externalHintShown = true;
-                ShowBalloon("\u5916\u90e8\u5b9e\u4f8b", "\u82e5\u9875\u9762\u63d0\u793a\u9700\u8981\u91cd\u65b0\u9a8c\u8bc1\uff0c\u8bf7\u7528\u83dc\u5355\u91cc\u7684\u300c\u91cd\u542f DSH\u300d\u7531\u6258\u76d8\u63a5\u7ba1\u3002", ToolTipIcon.Info);
+                ShowBalloon(Strings.T("外部实例", "External instance"),
+                    Strings.T("若页面提示需要重新验证，请用菜单里的「重启 DSH」由托盘接管。",
+                        "If the page asks you to re-authenticate, use \"Restart DSH\" in the tray menu to take it over."),
+                    ToolTipIcon.Info);
             }
         }
 
@@ -340,7 +358,7 @@ namespace DshTray
             try
             {
                 Clipboard.SetText(url);
-                ShowBalloon("\u5df2\u590d\u5236", url, ToolTipIcon.Info);
+                ShowBalloon(Strings.T("已复制", "Copied"), url, ToolTipIcon.Info);
             }
             catch (Exception ex)
             {
@@ -354,8 +372,10 @@ namespace DshTray
             if (snapshot.State == DshState.External)
             {
                 DialogResult result = MessageBox.Show(
-                    "\u5f53\u524d DSH \u7531\u547d\u4ee4\u884c\u542f\u52a8\u3002\r\n\u91cd\u542f\u4f1a\u7ed3\u675f\u8be5\u8fdb\u7a0b\uff0c\u5e76\u7531\u6258\u76d8\u91cd\u65b0\u542f\u52a8\u4e00\u4e2a\uff08\u9875\u9762\u5730\u5740\u4f1a\u53d8\u66f4\uff09\u3002\r\n\r\n\u786e\u5b9a\u7ee7\u7eed\u5417\uff1f",
-                    "\u91cd\u542f DSH",
+                    Strings.T(
+                        "当前 DSH 由命令行启动。\r\n重启会结束该进程，并由托盘重新启动一个（页面地址会变更）。\r\n\r\n确定继续吗？",
+                        "The current DSH instance was started from a command line.\r\nRestarting will stop that process and start a new one under the tray (the page URL will change).\r\n\r\nContinue?"),
+                    Strings.T("重启 DSH", "Restart DSH"),
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button2);
@@ -369,8 +389,10 @@ namespace DshTray
             StatusSnapshot snapshot = _ctl.Snapshot;
             if (snapshot.State != DshState.Running && snapshot.State != DshState.External && snapshot.State != DshState.Starting) return;
             DialogResult result = MessageBox.Show(
-                "\u505c\u6b62 DSH \u4f1a\u4e2d\u65ad\u6b63\u5728\u8fdb\u884c\u7684\u5bf9\u8bdd\u4efb\u52a1\u3002\r\n\r\n\u786e\u5b9a\u8981\u505c\u6b62\u5417\uff1f",
-                "\u505c\u6b62 DSH",
+                Strings.T(
+                    "停止 DSH 会中断正在进行的对话任务。\r\n\r\n确定要停止吗？",
+                    "Stopping DSH will interrupt running conversations and tasks.\r\n\r\nStop it?"),
+                Strings.T("停止 DSH", "Stop DSH"),
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning,
                 MessageBoxDefaultButton.Button2);
@@ -384,11 +406,15 @@ namespace DshTray
                 bool enable = !IsAutoStartEnabled();
                 SetAutoStart(enable);
                 _autoItem.Checked = enable;
-                ShowBalloon("\u5f00\u673a\u81ea\u52a8\u542f\u52a8", enable ? "\u5df2\u5f00\u542f\uff1a\u767b\u5f55 Windows \u540e\u6258\u76d8\u4f1a\u81ea\u52a8\u542f\u52a8 DSH\u3002" : "\u5df2\u5173\u95ed\u3002", ToolTipIcon.Info);
+                ShowBalloon(Strings.T("开机自动启动", "Start with Windows"),
+                    enable
+                        ? Strings.T("已开启：登录 Windows 后托盘会自动启动 DSH。", "Enabled: the tray will start DSH after you sign in to Windows.")
+                        : Strings.T("已关闭。", "Disabled."),
+                    ToolTipIcon.Info);
             }
             catch (Exception ex)
             {
-                ShowBalloon("\u8bbe\u7f6e\u5931\u8d25", ex.Message, ToolTipIcon.Error);
+                ShowBalloon(Strings.T("设置失败", "Settings failed"), ex.Message, ToolTipIcon.Error);
             }
         }
 
@@ -406,7 +432,7 @@ namespace DshTray
         {
             using (RegistryKey key = Registry.CurrentUser.CreateSubKey(RunKeyPath))
             {
-                if (key == null) throw new InvalidOperationException("\u65e0\u6cd5\u6253\u5f00\u6ce8\u518c\u8868\u542f\u52a8\u9879");
+                if (key == null) throw new InvalidOperationException(Strings.T("无法打开注册表启动项", "Cannot open the registry Run key"));
                 if (enabled) key.SetValue(AppPaths.AppName, Util.Quote(_exePath) + " --autostart");
                 else key.DeleteValue(AppPaths.AppName, false);
             }
@@ -417,7 +443,7 @@ namespace DshTray
         {
             if (string.IsNullOrEmpty(path) || !File.Exists(path))
             {
-                ShowBalloon("\u6587\u4ef6\u4e0d\u5b58\u5728", path ?? "", ToolTipIcon.Warning);
+                ShowBalloon(Strings.T("文件不存在", "File not found"), path ?? "", ToolTipIcon.Warning);
                 return;
             }
             try
@@ -428,7 +454,7 @@ namespace DshTray
             }
             catch (Exception ex)
             {
-                ShowBalloon("\u6253\u5f00\u5931\u8d25", ex.Message, ToolTipIcon.Error);
+                ShowBalloon(Strings.T("打开失败", "Open failed"), ex.Message, ToolTipIcon.Error);
             }
         }
 
@@ -443,7 +469,7 @@ namespace DshTray
             }
             catch (Exception ex)
             {
-                ShowBalloon("\u6253\u5f00\u5931\u8d25", ex.Message, ToolTipIcon.Error);
+                ShowBalloon(Strings.T("打开失败", "Open failed"), ex.Message, ToolTipIcon.Error);
             }
         }
 
@@ -463,7 +489,9 @@ namespace DshTray
                         StatusSnapshot current = _ctl.Snapshot;
                         if (!_silent)
                         {
-                            ShowBalloon("DSH " + (current.State == DshState.Running || current.State == DshState.External ? "\u5df2\u5728\u8fd0\u884c" : "\u72b6\u6001"),
+                            ShowBalloon("DSH " + (current.State == DshState.Running || current.State == DshState.External
+                                    ? Strings.T("已在运行", "already running")
+                                    : Strings.T("状态", "status")),
                                 BuildTooltip(current), ToolTipIcon.Info);
                         }
                     }

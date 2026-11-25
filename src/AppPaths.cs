@@ -9,7 +9,7 @@ namespace DshTray
         public const string AppName = "DeepSeekHarnessTray";
         public const string DisplayName = "DeepSeek Harness \u6258\u76d8";
         public const string ProductName = "DeepSeek Harness Tray";
-        public const string Version = "1.1.1";
+        public const string Version = "1.2.0";
 
         /// <summary>
         /// Optional isolated instance (tests, or several profiles side by side): set
